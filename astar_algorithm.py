@@ -28,8 +28,15 @@ def g_cost(new_node, current_node):
     Distance is 10 when moving horizontal/vertical, and sqrt(2)*10~=14 when diagonal.
     """
     adjacent_nodes_diagonal = [(-1, -1), (1, -1), (-1, 1), (1, 1)]
-    temp = (new_node.coord[0] - current_node.coord[0], new_node.coord[1] - current_node.coord[1])
-    return current_node.g_value + 14 if temp in adjacent_nodes_diagonal else current_node.g_value + 10
+    temp = (
+        new_node.coord[0] - current_node.coord[0],
+        new_node.coord[1] - current_node.coord[1],
+    )
+    return (
+        current_node.g_value + 14
+        if temp in adjacent_nodes_diagonal
+        else current_node.g_value + 10
+    )
 
 
 def heuristic(current_node, end_node):
@@ -39,13 +46,19 @@ def heuristic(current_node, end_node):
     x2 = end_node[0]
     y2 = end_node[1]
     # Euclid's method
-    return int(sqrt(((x1 - x2) ** 2) + ((y1 - y2) ** 2)) * 10)  # * 10 to fit g_cost scale
+    return int(
+        sqrt(((x1 - x2) ** 2) + ((y1 - y2) ** 2)) * 10
+    )  # * 10 to fit g_cost scale
 
 
 def check_neighbour(neighbour_node, wall, closed, number_of_cells):
     """Check if adjacent nodes are passable."""
-    if (neighbour_node.coord[0] < 0 or neighbour_node.coord[1] < 0
-            or neighbour_node.coord[0] > number_of_cells - 1 or neighbour_node.coord[1] > number_of_cells - 1):
+    if (
+        neighbour_node.coord[0] < 0
+        or neighbour_node.coord[1] < 0
+        or neighbour_node.coord[0] > number_of_cells - 1
+        or neighbour_node.coord[1] > number_of_cells - 1
+    ):
         return True  # out of grid
     if neighbour_node.coord in closed:
         return True  # closed set of nodes
@@ -67,20 +80,20 @@ def to_coord(start_id, end_id, wall_id, normal_id, number_cells, can, draw_flag)
     wall = []
     normal = []
     for cell_s in start_id:
-        y = cell_s.find('y')
-        coord_s = (int(cell_s[1:y]), int(cell_s[y + 1:]))
+        y = cell_s.find("y")
+        coord_s = (int(cell_s[1:y]), int(cell_s[y + 1 :]))
         start.append(Node(coord_s))
     for cell_e in end_id:
-        y = cell_e.find('y')
-        coord_e = (int(cell_e[1:y]), int(cell_e[y + 1:]))
+        y = cell_e.find("y")
+        coord_e = (int(cell_e[1:y]), int(cell_e[y + 1 :]))
         end.append(Node(coord_e))
     for cell_w in wall_id:
-        y = cell_w.find('y')
-        coord_w = (int(cell_w[1:y]), int(cell_w[y + 1:]))
+        y = cell_w.find("y")
+        coord_w = (int(cell_w[1:y]), int(cell_w[y + 1 :]))
         wall.append(Node(coord_w))
     for cell_n in normal_id:
-        y = cell_n.find('y')
-        coord_n = (int(cell_n[1:y]), int(cell_n[y + 1:]))
+        y = cell_n.find("y")
+        coord_n = (int(cell_n[1:y]), int(cell_n[y + 1 :]))
         normal.append(Node(coord_n))
 
     astar(start, end, wall, number_cells, can, draw_flag)
@@ -92,11 +105,20 @@ def astar(start, end, wall, number_of_cells, can, draw):
     Run algorithm with parameters taken from GUI.
     Can be set to color nodes with every iteration or just color the path in the end.
     """
-    adjacent_nodes = [(-1, -1), (0, -1), (1, -1), (-1, 0), (1, 0), (-1, 1), (0, 1), (1, 1)]
+    adjacent_nodes = [
+        (-1, -1),
+        (0, -1),
+        (1, -1),
+        (-1, 0),
+        (1, 0),
+        (-1, 1),
+        (0, 1),
+        (1, 1),
+    ]
     temp_node = Node((0, 0))
     open_nodes = set()
     closed_nodes = set()
-    open_coord = set()  # set of only coordinates of open nodes
+    open_coord = set()  # set of only the coordinates of open nodes
     closed_coord = set()
     wall_coord = set()
 
@@ -123,8 +145,8 @@ def astar(start, end, wall, number_of_cells, can, draw):
             closed_coord.add(item.coord)
 
         if draw:  # color closed nodes on GUI
-            tag = f'x{current.coord[0]}y{current.coord[1]}'
-            can.itemconfig(tag, fill='red')
+            tag = f"x{current.coord[0]}y{current.coord[1]}"
+            can.itemconfig(tag, fill="red")
             can.update()
 
         if current.coord == end[0].coord:  # path found
@@ -133,33 +155,40 @@ def astar(start, end, wall, number_of_cells, can, draw):
                 path.append(node.coord)
                 node = node.parent
             path_rev = path[::-1]
-            print('path:', path_rev)
+            print("path:", path_rev)
             for step in path_rev:
-                tag = f'x{step[0]}y{step[1]}'
-                can.itemconfig(tag, fill='blue')
+                tag = f"x{step[0]}y{step[1]}"
+                can.itemconfig(tag, fill="blue")
                 if draw:
                     can.update()
             can.update()
             time_stop = time.time()
-            print('run time =', time_stop-time_start)
+            print("run time =", time_stop - time_start)
             break
 
         valid_neighbours = []
         # check every neighbour
         for adjacent in adjacent_nodes:
             neighbour = Node(adjacent)
-            neighbour.coord = (current.coord[0] + adjacent[0], current.coord[1] + adjacent[1])
+            neighbour.coord = (
+                current.coord[0] + adjacent[0],
+                current.coord[1] + adjacent[1],
+            )
 
             if check_neighbour(neighbour, wall_coord, closed_coord, number_of_cells):
                 continue  # change to next neighbour if current is not traversable
 
             valid_neighbours.append(neighbour)
             if draw:  # color open nodes on GUI
-                tag = f'x{neighbour.coord[0]}y{neighbour.coord[1]}'
-                can.itemconfig(tag, fill='yellow')
+                tag = f"x{neighbour.coord[0]}y{neighbour.coord[1]}"
+                can.itemconfig(tag, fill="yellow")
         can.update()
 
-        for node in valid_neighbours:  # set or change path cost values and parents according to lowest f_value
+        for (
+            node
+        ) in (
+            valid_neighbours
+        ):  # set or change path cost values and parents according to lowest f_value
 
             if node.coord in closed_coord:
                 continue
@@ -182,7 +211,7 @@ def astar(start, end, wall, number_of_cells, can, draw):
                     node.parent = temp_node.parent
 
     if not path:  # if it's impossible to get from start to end
-        print('No path!')
+        print("No path!")
         time_stop = time.time()
-        print('run time =', time_stop - time_start)
+        print("run time =", time_stop - time_start)
     return None
